@@ -1,0 +1,349 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RAZA AI BUSINESS MANAGER</title>
+<style>
+:root {
+  --bg:#090a0d;
+  --panel:#121419;
+  --panel2:#191c23;
+  --gold:#d6ae52;
+  --text:#f4f1e8;
+  --muted:#9296a1;
+  --border:#292c34;
+}
+*{box-sizing:border-box}
+body{
+ margin:0;background:var(--bg);color:var(--text);
+ font-family:Arial,sans-serif;display:flex;min-height:100vh
+}
+.sidebar{
+ width:255px;background:#0d0f13;border-right:1px solid var(--border);
+ padding:24px 16px;position:fixed;inset:0 auto 0 0;
+ overflow-y:auto;z-index:5
+}
+.brand{font-size:20px;font-weight:bold;color:var(--gold);padding:8px}
+.brand small{display:block;font-size:10px;letter-spacing:3px;color:#aaa;margin-top:8px}
+.nav-title{font-size:10px;color:#777;margin:28px 10px 10px;letter-spacing:2px}
+.nav button{
+ display:block;width:100%;padding:13px 12px;margin:4px 0;
+ border:0;border-radius:8px;background:transparent;color:#bbb;
+ text-align:left;font-size:14px;cursor:pointer
+}
+.nav button:hover,.nav button.active{
+ background:#292318;color:var(--gold)
+}
+.main{margin-left:255px;width:calc(100% - 255px);padding:28px}
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:15px;margin-bottom:30px}
+.topbar h2{margin:0;font-size:22px}
+.status{color:#65cf91;font-size:12px}
+.profile{border:1px solid var(--border);padding:10px 14px;border-radius:8px;color:var(--gold)}
+.page{display:none}.page.active{display:block}
+.welcome{
+ background:linear-gradient(115deg,#242016,#14151a);
+ border:1px solid #4b3b1e;border-radius:15px;padding:30px;margin-bottom:24px
+}
+.welcome h1{font-size:30px;margin:0 0 12px}
+.welcome p{color:#bbb;margin:0}
+.gold{color:var(--gold)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;margin-bottom:22px}
+.card{
+ background:var(--panel);border:1px solid var(--border);
+ border-radius:12px;padding:20px;min-width:0
+}
+.card h3{margin:0 0 12px;font-size:15px}
+.number{font-size:27px;color:var(--gold);font-weight:bold}
+.muted{font-size:12px;color:var(--muted)}
+.section-title{font-size:18px;margin:28px 0 15px}
+.two{display:grid;grid-template-columns:1.2fr .8fr;gap:16px}
+.platform{display:flex;justify-content:space-between;align-items:center;padding:13px 0;border-bottom:1px solid var(--border)}
+.platform:last-child{border:0}
+.tag{font-size:11px;color:#d6ae52;background:#292318;padding:5px 9px;border-radius:20px}
+button,.btn{
+ background:var(--gold);color:#17130b;border:0;border-radius:7px;
+ padding:11px 16px;font-weight:bold;cursor:pointer
+}
+button.secondary{background:#252830;color:#eee;border:1px solid var(--border)}
+input,textarea,select{
+ width:100%;background:#0d1015;color:white;border:1px solid #343741;
+ border-radius:7px;padding:12px;margin:7px 0 16px;font:inherit
+}
+textarea{min-height:125px;resize:vertical}
+label{font-size:12px;color:#aaa}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+.output{
+ white-space:pre-wrap;background:#0b0d11;padding:15px;border-radius:8px;
+ border:1px solid var(--border);min-height:65px;color:#ddd;margin-top:12px
+}
+.notice{border:1px solid #514222;background:#211c12;color:#dfc98e;padding:13px;border-radius:8px;font-size:12px;margin:15px 0}
+.footer{margin-top:40px;color:#666;font-size:11px;text-align:center}
+@media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:650px){
+ body{display:block}.sidebar{position:relative;width:100%;height:auto}
+ .nav{display:grid;grid-template-columns:repeat(2,1fr)}
+ .nav-title{margin-top:15px}
+ .main{margin:0;width:100%;padding:16px}
+ .two{grid-template-columns:1fr}
+ .welcome h1{font-size:23px}
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+ <div class="brand">RAZA AI <span class="gold">BUSINESS</span>
+ <small>YOUR BUSINESS. YOUR AI.</small></div>
+ <div class="nav">
+  <div class="nav-title">WORKSPACE</div>
+  <button class="active" onclick="showPage('dashboard',this)">▦ Dashboard</button>
+  <button onclick="showPage('assistant',this)">✦ AI Assistant</button>
+  <button onclick="showPage('content',this)">✎ Content Studio</button>
+  <button onclick="showPage('ads',this)">◈ Advertisement</button>
+  <button onclick="showPage('video',this)">▶ Video Maker</button>
+  <div class="nav-title">SOCIAL MEDIA</div>
+  <button onclick="showPage('social',this)">◎ Social Manager</button>
+  <button onclick="showPage('whatsapp',this)">◉ WhatsApp</button>
+  <button onclick="showPage('email',this)">✉ Email Manager</button>
+  <div class="nav-title">BUSINESS</div>
+  <button onclick="showPage('automation',this)">⚙ Automation</button>
+  <button onclick="showPage('reports',this)">▤ Reports</button>
+  <button onclick="showPage('settings',this)">⚙ Settings</button>
+ </div>
+</aside>
+
+<main class="main">
+ <header class="topbar">
+  <div><h2 id="pageTitle">Dashboard</h2><span class="status">● WORKSPACE ONLINE</span></div>
+  <div class="profile">RAZA TECH AI</div>
+ </header>
+
+<section id="dashboard" class="page active">
+ <div class="welcome">
+  <h1>Welcome to <span class="gold">RAZA AI</span></h1>
+  <p>Your intelligent business management workspace. Build smart. Think big.</p>
+ </div>
+ <div class="grid">
+  <div class="card"><h3>AI Tools</h3><div class="number">08</div><div class="muted">Workspace modules</div></div>
+  <div class="card"><h3>Social Platforms</h3><div class="number">05</div><div class="muted">Available integrations</div></div>
+  <div class="card"><h3>Saved Content</h3><div class="number" id="savedCount">0</div><div class="muted">In this browser</div></div>
+  <div class="card"><h3>Automation</h3><div class="number">READY</div><div class="muted">Awaiting connections</div></div>
+ </div>
+ <div class="two">
+  <div class="card"><h3>Business Control Center</h3>
+   <div class="platform">AI Assistant <span class="tag">Available</span></div>
+   <div class="platform">Content Generator <span class="tag">Available</span></div>
+   <div class="platform">Advertisement Studio <span class="tag">Available</span></div>
+   <div class="platform">Video Maker <span class="tag">Setup required</span></div>
+  </div>
+  <div class="card"><h3>Quick Actions</h3>
+   <div class="actions">
+    <button onclick="showPage('content')">Create Post</button>
+    <button onclick="showPage('ads')">Create Ad</button>
+    <button class="secondary" onclick="showPage('social')">Social Accounts</button>
+   </div>
+  </div>
+ </div>
+</section>
+
+<section id="assistant" class="page">
+ <div class="card">
+  <h3>✦ RAZA AI Business Assistant</h3>
+  <p class="muted">Apna business task likhein.</p>
+  <textarea id="ask" placeholder="Example: Mere business ke liye marketing plan banao..."></textarea>
+  <button onclick="askAI()">Generate Business Plan</button>
+  <div id="answer" class="output">Your AI response will appear here.</div>
+  <div class="notice">AI API connection abhi configure nahi hui. Real AI responses ke liye secure backend zaroori hai.</div>
+ </div>
+</section>
+
+<section id="content" class="page">
+ <div class="card">
+  <h3>✎ AI Content Studio</h3>
+  <label>Business Name</label><input id="business" placeholder="Your business name">
+  <label>Product / Service</label><input id="product" placeholder="Your product">
+  <label>Social Platform</label>
+  <select id="platform"><option>Facebook</option><option>Instagram</option><option>TikTok</option><option>WhatsApp</option></select>
+  <label>Content Language</label>
+  <select id="language"><option>English</option><option>Urdu</option><option>Roman Urdu</option></select>
+  <label>Extra Details</label><textarea id="details" placeholder="Offer, price, product features..."></textarea>
+  <button onclick="generateContent()">Create Content</button>
+  <div id="contentOutput" class="output">Generated content will appear here.</div>
+  <button class="secondary" onclick="saveOutput('contentOutput')">Save Content</button>
+ </div>
+</section>
+
+<section id="ads" class="page">
+ <div class="card">
+  <h3>◈ Advertisement Generator</h3>
+  <label>Product / Service</label><input id="adProduct" placeholder="Product name">
+  <label>Offer / Price</label><input id="adOffer" placeholder="Example: 20% discount">
+  <label>Target Audience</label><input id="audience" placeholder="Who should see this ad?">
+  <label>Ad Platform</label><select id="adPlatform"><option>Facebook</option><option>Instagram</option><option>TikTok</option></select>
+  <button onclick="generateAd()">Generate Advertisement</button>
+  <div id="adOutput" class="output">Your advertisement will appear here.</div>
+  <button class="secondary" onclick="saveOutput('adOutput')">Save Advertisement</button>
+ </div>
+</section>
+
+<section id="video" class="page">
+ <div class="card">
+  <h3>▶ AI Video Maker</h3>
+  <label>Video Topic</label><input id="videoTopic" placeholder="Enter video topic">
+  <label>Video Duration</label><select id="duration"><option>30 seconds</option><option>60 seconds</option><option>2 minutes</option></select>
+  <button onclick="generateVideoScript()">Generate Video Script</button>
+  <div id="videoOutput" class="output">Video script will appear here.</div>
+  <div class="notice">Video rendering and MP4 export require a connected video generation service. This screen currently prepares the script only.</div>
+ </div>
+</section>
+
+<section id="social" class="page">
+ <div class="card">
+  <h3>◎ Social Media Manager</h3>
+  <div class="platform">Facebook <span class="tag">Connection required</span></div>
+  <div class="platform">Instagram <span class="tag">Connection required</span></div>
+  <div class="platform">TikTok <span class="tag">Connection required</span></div>
+  <div class="platform">WhatsApp Business <span class="tag">Connection required</span></div>
+  <div class="platform">Email <span class="tag">Connection required</span></div>
+  <div class="notice">Connect accounts through official APIs and secure authorization. Never enter account passwords here.</div>
+ </div>
+</section>
+
+<section id="whatsapp" class="page">
+ <div class="card"><h3>◉ WhatsApp Manager</h3>
+  <p>Business messages, customer replies and WhatsApp campaigns.</p>
+  <div class="notice">Requires WhatsApp Business Platform API and approved business setup.</div>
+ </div>
+</section>
+
+<section id="email" class="page">
+ <div class="card"><h3>✉ Email Manager</h3>
+  <label>Email Subject</label><input id="emailSubject" placeholder="Email subject">
+  <label>What should the email say?</label><textarea id="emailText" placeholder="Describe your email..."></textarea>
+  <button onclick="makeEmail()">Draft Email</button>
+  <div id="emailOutput" class="output"></div>
+  <button class="secondary" onclick="saveOutput('emailOutput')">Save Draft</button>
+ </div>
+</section>
+
+<section id="automation" class="page">
+ <div class="card"><h3>⚙ Business Automation</h3>
+  <div class="platform">Automatic content planning <span class="tag">Planned</span></div>
+  <div class="platform">Post scheduling <span class="tag">Planned</span></div>
+  <div class="platform">Customer support <span class="tag">Planned</span></div>
+  <div class="platform">Daily business report <span class="tag">Planned</span></div>
+  <div class="notice">Automations will activate after the backend and platform integrations are connected.</div>
+ </div>
+</section>
+
+<section id="reports" class="page">
+ <div class="card"><h3>▤ Business Reports</h3>
+  <p>Saved content: <b id="reportCount">0</b></p>
+  <p class="muted">Social analytics and sales reports will appear after connecting supported services.</p>
+ </div>
+</section>
+
+<section id="settings" class="page">
+ <div class="card"><h3>⚙ Workspace Settings</h3>
+  <label>Workspace Name</label><input id="workspaceName" value="RAZA AI BUSINESS MANAGER">
+  <label>Business Tagline</label><input id="tagline" value="YOUR BUSINESS. YOUR AI. YOUR CONTROL.">
+  <button onclick="saveSettings()">Save Settings</button>
+  <div id="settingsOutput" class="output">Settings are stored in this browser.</div>
+ </div>
+</section>
+
+<div class="footer">RAZA TECHNOLOGIES AI · BUILD SMART. THINK BIG.</div>
+</main>
+
+<script>
+const pages = {
+ dashboard:"Dashboard",assistant:"AI Assistant",content:"Content Studio",
+ ads:"Advertisement Generator",video:"AI Video Maker",social:"Social Media Manager",
+ whatsapp:"WhatsApp Manager",email:"Email Manager",automation:"Automation",
+ reports:"Business Reports",settings:"Settings"
+};
+
+function showPage(id,button){
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById(id).classList.add("active");
+ document.getElementById("pageTitle").textContent=pages[id];
+ document.querySelectorAll(".nav button").forEach(b=>b.classList.remove("active"));
+ if(button)button.classList.add("active");
+}
+
+function getSaved(){
+ try{return JSON.parse(localStorage.getItem("raza_business_content")||"[]")}
+ catch(e){return []}
+}
+function updateCount(){
+ const count=getSaved().length;
+ document.getElementById("savedCount").textContent=count;
+ document.getElementById("reportCount").textContent=count;
+}
+function saveText(text,type){
+ if(!text.trim())return alert("Pehle content generate karein.");
+ const saved=getSaved();
+ saved.unshift({text,type,date:new Date().toLocaleString()});
+ localStorage.setItem("raza_business_content",JSON.stringify(saved));
+ updateCount();
+ alert("Content saved successfully!");
+}
+function saveOutput(id){
+ saveText(document.getElementById(id).textContent,"Content");
+}
+function generateContent(){
+ const b=document.getElementById("business").value.trim();
+ const p=document.getElementById("product").value.trim();
+ const platform=document.getElementById("platform").value;
+ const lang=document.getElementById("language").value;
+ const d=document.getElementById("details").value.trim();
+ if(!b||!p)return alert("Business name aur product likhein.");
+ const t=`${b} presents ${p}!\n\nDiscover quality and value with our latest offering.\n${d}\n\nContact us today to learn more!\n\n#${b.replace(/\s/g,"")} #${p.replace(/\s/g,"")} #Business\n\nPlatform: ${platform}\nLanguage: ${lang}\n\nNote: Connect an AI API for personalized AI-generated content.`;
+ document.getElementById("contentOutput").textContent=t;
+}
+function generateAd(){
+ const p=document.getElementById("adProduct").value.trim();
+ const o=document.getElementById("adOffer").value.trim();
+ const a=document.getElementById("audience").value.trim();
+ const platform=document.getElementById("adPlatform").value;
+ if(!p)return alert("Product name likhein.");
+ document.getElementById("adOutput").textContent=
+ `SPECIAL OFFER!\n\nDiscover ${p} today!\n${o}\n\nMade for: ${a||"Everyone"}\n\nOrder now and contact us for details!\n\n#${p.replace(/\s/g,"")} #SpecialOffer\n\nPlatform: ${platform}\n\nDemo template: connect AI to create custom ads.`;
+}
+function generateVideoScript(){
+ const topic=document.getElementById("videoTopic").value.trim();
+ const duration=document.getElementById("duration").value;
+ if(!topic)return alert("Video topic likhein.");
+ document.getElementById("videoOutput").textContent=
+ `VIDEO TOPIC: ${topic}\nDURATION: ${duration}\n\nSCENE 1: Attention-grabbing opening about ${topic}.\n\nSCENE 2: Explain the main idea with engaging visuals.\n\nSCENE 3: Share an interesting benefit or fact.\n\nSCENE 4: End with a strong call to action.\n\nConnect AI API for a complete custom script and video rendering service for MP4 output.`;
+}
+function askAI(){
+ const q=document.getElementById("ask").value.trim();
+ if(!q)return alert("Apna task likhein.");
+ document.getElementById("answer").textContent=
+ "Your request: "+q+"\n\nAI backend connection required for a real intelligent response. The dashboard is ready for backend integration.";
+}
+function makeEmail(){
+ const s=document.getElementById("emailSubject").value.trim();
+ const t=document.getElementById("emailText").value.trim();
+ if(!s||!t)return alert("Subject aur email details likhein.");
+ document.getElementById("emailOutput").textContent=
+ "Subject: "+s+"\n\nDear Customer,\n\n"+t+"\n\nBest regards,\nRAZA TECHNOLOGIES AI";
+}
+function saveSettings(){
+ localStorage.setItem("raza_workspace_name",document.getElementById("workspaceName").value);
+ localStorage.setItem("raza_tagline",document.getElementById("tagline").value);
+ document.getElementById("settingsOutput").textContent="Settings saved successfully.";
+}
+document.addEventListener("DOMContentLoaded",()=>{
+ const n=localStorage.getItem("raza_workspace_name");
+ const t=localStorage.getItem("raza_tagline");
+ if(n)document.getElementById("workspaceName").value=n;
+ if(t)document.getElementById("tagline").value=t;
+ updateCount();
+});
+</script>
+</body>
+</html>
