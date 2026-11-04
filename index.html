@@ -319,19 +319,44 @@ function generateVideoScript(){
  document.getElementById("videoOutput").textContent=
  `VIDEO TOPIC: ${topic}\nDURATION: ${duration}\n\nSCENE 1: Attention-grabbing opening about ${topic}.\n\nSCENE 2: Explain the main idea with engaging visuals.\n\nSCENE 3: Share an interesting benefit or fact.\n\nSCENE 4: End with a strong call to action.\n\nConnect AI API for a complete custom script and video rendering service for MP4 output.`;
 }
-function askAI(){
- const q=document.getElementById("ask").value.trim();
- if(!q)return alert("Apna task likhein.");
- document.getElementById("answer").textContent=
- "Your request: "+q+"\n\nAI backend connection required for a real intelligent response. The dashboard is ready for backend integration.";
+
+async function askAI() {
+  const q = document.getElementById("ask").value.trim();
+  const answer = document.getElementById("answer");
+
+  if (!q) {
+    return alert("Apna task likhein.");
+  }
+
+  answer.textContent = "RAZA TECH AI soch raha hai...";
+
+  try {
+    const response = await fetch("/api/assistant", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        prompt: q,
+        task: "business assistance"
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "AI request failed.");
+    }
+
+    answer.textContent = data.text || "AI se jawab nahi mila.";
+
+  } catch (error) {
+    answer.textContent =
+      "Connection Error: " + error.message +
+      "\n\nPlease check your backend connection.";
+  }
 }
-function makeEmail(){
- const s=document.getElementById("emailSubject").value.trim();
- const t=document.getElementById("emailText").value.trim();
- if(!s||!t)return alert("Subject aur email details likhein.");
- document.getElementById("emailOutput").textContent=
- "Subject: "+s+"\n\nDear Customer,\n\n"+t+"\n\nBest regards,\nRAZA TECHNOLOGIES AI";
-}
+
 function saveSettings(){
  localStorage.setItem("raza_workspace_name",document.getElementById("workspaceName").value);
  localStorage.setItem("raza_tagline",document.getElementById("tagline").value);

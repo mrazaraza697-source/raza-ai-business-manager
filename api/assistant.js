@@ -1,3 +1,4 @@
+
 export default async function handler(req, res) {
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -16,11 +17,15 @@ export default async function handler(req, res) {
     const userPrompt = String(prompt || message || "").trim();
 
     if (!userPrompt) {
-      return res.status(400).json({ error: "Please enter a prompt." });
+      return res.status(400).json({
+        error: "Please enter a prompt."
+      });
     }
 
     if (userPrompt.length > 12000) {
-      return res.status(400).json({ error: "Prompt is too long." });
+      return res.status(400).json({
+        error: "Prompt is too long."
+      });
     }
 
     const systemInstruction = `
@@ -29,15 +34,17 @@ for RAZA TECHNOLOGIES AI.
 
 Tagline: BUILD SMART. THINK BIG.
 
-Help users with business planning, marketing, social media content,
-advertisements, video scripts, emails, customer support and business tasks.
+Help with business planning, marketing, social media content,
+advertisements, video scripts, emails, customer support
+and business tasks.
 
 Be practical, accurate and professional.
-Do not claim that you have published posts, sent messages,
-connected accounts or performed actions unless an authorized
-integration confirms that action.
-
 Respond in the language used by the user.
+
+Never claim to have published posts, sent messages,
+connected accounts or performed actions unless confirmed
+by an authorized integration.
+
 Task: ${String(task || "general business assistance").slice(0, 100)}
 `;
 
@@ -60,7 +67,6 @@ Task: ${String(task || "general business assistance").slice(0, 100)}
             }
           ],
           generationConfig: {
-            temperature: 0.7,
             maxOutputTokens: 2000
           }
         })
