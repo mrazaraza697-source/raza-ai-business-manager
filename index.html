@@ -331,7 +331,7 @@ async function askAI() {
   answer.textContent = "RAZA TECH AI soch raha hai...";
 
   try {
-    const response = await fetch("/api/assistant", {
+    const response = await fetch("/api/router?handler=assistant", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
