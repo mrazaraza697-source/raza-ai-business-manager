@@ -56,13 +56,14 @@ export default async function handler(req, res) {
     ? req.query.handler[0]
     : req.query.handler;
 
-  if (!selectedHandler) {
-  return res.status(404).json({
-    error: "API route not found.",
-    receivedHandler: name,
-    availableHandlers: Object.keys(handlers)
-  });
-}
+   if (!selectedHandler) {
+    return res.status(404).json({
+      error: "API route not found.",
+      receivedHandler: name,
+      availableHandlers: Object.keys(handlers)
+    });
+  }
+
   try {
     return await selectedHandler(req, res);
   } catch (error) {
