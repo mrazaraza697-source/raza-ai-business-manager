@@ -19,6 +19,13 @@ import strategy from "../lib/handlers/strategy.js";
 import tasks from "../lib/handlers/tasks.js";
 import video from "../lib/handlers/video.js";
 import whatsapp from "../lib/handlers/whatsapp.js";
+import whatsappWebhook from "./whatsapp-webhook.js";
+
+export const config = {
+  api: {
+    bodyParser: false
+  }
+};
 
 const handlers = {
   advertisement,
@@ -40,7 +47,8 @@ const handlers = {
   strategy,
   tasks,
   video,
-  whatsapp
+  whatsapp,
+  "whatsapp-webhook": whatsappWebhook
 };
 
 export default async function handler(req, res) {
@@ -59,6 +67,8 @@ export default async function handler(req, res) {
   try {
     return await selectedHandler(req, res);
   } catch (error) {
+    console.error("API router error:", error.message);
+
     return res.status(500).json({
       error: "Internal server error."
     });
