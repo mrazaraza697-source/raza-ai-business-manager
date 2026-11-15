@@ -678,16 +678,30 @@ async function signOut() {
   await updateAuthUI();
 }
 
+
 async function updateAuthUI() {
   const { data, error } = await window.razaSupabase.auth.getUser();
 
   const status = document.getElementById("authStatus");
   const signOutBtn = document.getElementById("signOutBtn");
+  const authCard = document.getElementById("authCard");
 
   if (error) {
     status.textContent = "Auth error";
     return;
   }
+
+  if (data.user) {
+    status.textContent = "Signed in: " + data.user.email;
+    signOutBtn.hidden = false;
+    authCard.hidden = true;
+  } else {
+    status.textContent = "Not signed in";
+    signOutBtn.hidden = true;
+    authCard.hidden = false;
+  }
+}
+
 
   if (data.user) {
     status.textContent = "Signed in: " + data.user.email;
