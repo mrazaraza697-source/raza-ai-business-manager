@@ -53,6 +53,26 @@
     @media(max-width:760px){.sidebar{width:252px;transform:translateX(-101%);transition:transform .22s ease;box-shadow:18px 0 40px #19233c14}body.sidebar-open .sidebar{transform:translateX(0)}.main{margin-left:0}.menu-toggle{display:inline-grid;place-items:center}.topbar{height:62px;padding:0 17px}.content-wrap{padding:26px 17px 40px}.form-layout,.dashboard-grid,.settings-grid{grid-template-columns:1fr}.output-card{position:static}.page-heading{align-items:flex-start;flex-direction:column}.feature-grid{grid-template-columns:1fr}.top-date{display:none}}
     @media(max-width:480px){.stats-grid{gap:10px}.stat-card{min-height:105px;padding:14px}.stat-value{font-size:22px}.fields{grid-template-columns:1fr}.field.full{grid-column:auto}.quick-grid{gap:9px}.quick-action{min-height:100px;flex-direction:column;gap:8px;padding:12px}.topbar-right .status-pill{padding:7px 8px;font-size:10px}}
   </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+  const SUPABASE_URL = "https://wdxqnoyjclplrgtudqfp.supabase.co";
+  const SUPABASE_PUBLISHABLE_KEY = sb_publishable_fAsdWFapEKukwd9TA71kYA_oP1yrtAV";
+
+  window.razaSupabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_PUBLISHABLE_KEY,
+    {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        storage: window.localStorage
+      }
+    }
+  );
+
+  console.log("RAZA AI: Supabase connection initialized.");
+</script>
 </head>
 <body>
   <aside class="sidebar" aria-label="Main sidebar">
