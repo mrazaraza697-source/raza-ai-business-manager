@@ -97,6 +97,34 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fAsdWFapEKukwd9TA71kYA_oP1yrtAV
     <div class="content-wrap">
       <section class="page active" id="dashboard">
         <div class="page-heading"><div><div class="eyebrow">Overview</div><h1>Good to see you 👋</h1><p class="page-subtitle">A clear view of your creative work and AI-powered business tools.</p></div><button class="btn" onclick="openPage('assistant')">✳&nbsp; Ask your AI assistant</button></div>
+        <article class="card form-card" id="authCard" style="margin-bottom:18px">
+  <div class="output-top">
+    <div>
+      <h2>RAZA AI Account</h2>
+      <p class="card-description">Login or create your secure account to save content online.</p>
+    </div>
+    <span id="authStatus" class="output-status">Not signed in</span>
+  </div>
+
+  <div class="fields">
+    <div class="field">
+      <label for="authEmail">Email address</label>
+      <input id="authEmail" type="email" placeholder="Your email" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="authPassword">Password</label>
+      <input id="authPassword" type="password" placeholder="Your password" autocomplete="current-password">
+    </div>
+  </div>
+
+  <div class="form-actions">
+    <button class="btn" onclick="signIn()">Login</button>
+    <button class="btn btn-secondary" onclick="signUp()">Create account</button>
+    <button class="btn btn-secondary" id="signOutBtn" onclick="signOut()" hidden>Logout</button>
+  </div>
+
+  <div id="authMessage" role="status" aria-live="polite"></div>
+</article>
         <div class="grid stats-grid">
           <article class="card stat-card"><div class="stat-top"><span>Saved creations</span><span class="stat-icon">▤</span></div><strong class="stat-value" id="savedCount">0</strong><span class="stat-note">Stored in this browser</span></article>
           <article class="card stat-card"><div class="stat-top"><span>Saved outputs</span><span class="stat-icon">▥</span></div><strong class="stat-value" id="reportCount">0</strong><span class="stat-note">Generated items saved locally</span></article>
