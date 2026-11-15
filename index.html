@@ -277,25 +277,78 @@ function updateCount() {
   if (reportCount) reportCount.textContent = count;
 }
 
-function saveText(text, type) {
-  if (!text.trim()) return alert("Pehle content generate karein.");
 
+async function saveText(text, type) {
+  if (!text || !text.trim()) {
+    return alert("Pehle content generate karein.");
+  }
+
+  // 1. Browser mein local saving
   const saved = getSaved();
+
   saved.unshift({
-    text,
+    text: text.trim(),
     type,
     date: new Date().toLocaleString()
   });
 
-  localStorage.setItem("raza_business_content", JSON.stringify(saved));
+  localStorage.setItem(
+    "raza_business_content",
+    JSON.stringify(saved)
+  );
+
   updateCount();
-  alert("Content saved successfully!");
+
+  // 2. Supabase cloud saving
+  try {
+    const supabase = window.razaSupabase;
+
+    if (!supabase) {
+      return alert("Content browser mein save ho gaya. Supabase connection nahi mila.");
+    }
+
+    const { data: { user }, error: userError } =
+      await supabase.auth.getUser();
+
+    if (userError || !user) {
+      return alert("Content browser mein save ho gaya. Cloud saving ke liye login karein.");
+    }
+
+    const { error } = await supabase
+      .from("saved_content")
+      .insert({
+        user_id: user.id,
+        title: "RAZA AI Saved Content",
+        content: text.trim(),
+        content_type: type || "content",
+        platform: "General"
+      });
+
+    if (error) {
+      console.error("Supabase Save Error:", error);
+      return alert("Browser mein save ho gaya, lekin cloud saving failed: " + error.message);
+    }
+
+    alert("Success! Content browser aur Supabase dono mein save ho gaya.");
+
+  } catch (error) {
+    console.error("Save Error:", error);
+    alert("Browser mein save ho gaya, cloud saving mein error aaya.");
+  }
 }
 
-function saveOutput(id) {
+async function saveOutput(id) {
   const output = document.getElementById(id);
-  saveText(output.textContent, id);
+
+  if (!output) {
+    return alert("Content output nahi mila.");
+  }
+
+  await saveText(output.textContent, id);
 }
+
+
+
 
 async function callAI(handler, payload) {
   const response = await fetch(
