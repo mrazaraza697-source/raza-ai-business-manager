@@ -662,8 +662,12 @@ async function signIn() {
   }
 
   message.textContent = "Login successful!";
+
   await updateAuthUI();
+
+  showPage("dashboard", null);
 }
+
 
 async function signOut() {
   const { error } = await window.razaSupabase.auth.signOut();
