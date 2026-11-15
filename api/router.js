@@ -51,29 +51,68 @@ const handlers = {
   "whatsapp-webhook": whatsappWebhook
 };
 
-export default async function handler(req, res) {
-  const name = Array.isArray(req.query.handler)
-  ? req.query.handler[0]
-  : req.query.handler;
+async function parseJsonBody(req) {
+  if (req.body !== undefined) {
+    return;
+  }
 
-const selectedHandler = handlers[name];
+  const chunks = [];
 
-if (!selectedHandler) {
-  return res.status(404).json({
-    error: "API route not found.",
-    receivedHandler: name,
-    availableHandlers: Object.keys(handlers)
-  });
-}
+  for await (const chunk of req) {
+    chunks.push(
+      Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk)
+    );
+  }
+
+  const rawBody = Buffer.concat(chunks).toString("utf8");
+
+  if (!rawBody.trim()) {
+    req.body = {};
+    return;
+  }
 
   try {
+    req.body = JSON.parse(rawBody);
+  } catch {
+    throw new Error("Invalid JSON request body.");
+  }
+}
+
+export default async function handler(req, res) {
+  const name = Array.isArray(req.query.handler)
+    ? req.query.handler[0]
+    : req.query.handler;
+
+  const selectedHandler = handlers[name];
+
+  if (!selectedHandler) {
+    return res.status(404).json({
+      error: "API route not found.",
+      receivedHandler: name,
+      availableHandlers: Object.keys(handlers)
+    });
+  }
+
+  try {
+    // Keep the WhatsApp webhook raw body untouched
+    // because it verifies Meta's request signature.
+    if (name !== "whatsapp-webhook") {
+      await parseJsonBody(req);
+    }
+
     return await selectedHandler(req, res);
+
   } catch (error) {
-    console.error("API router error:", error.message);
+    console.error("API router error:", error);
+
+    if (error.message === "Invalid JSON request body.") {
+      return res.status(400).json({
+        error: error.message
+      });
+    }
 
     return res.status(500).json({
       error: "Internal server error."
     });
   }
 }
- 
