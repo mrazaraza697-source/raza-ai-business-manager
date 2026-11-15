@@ -648,7 +648,6 @@ async function signIn() {
     message.textContent = "Email aur password enter karein.";
     return;
   }
-
   message.textContent = "Login ho raha hai...";
 
   const { error } = await window.razaSupabase.auth.signInWithPassword({
