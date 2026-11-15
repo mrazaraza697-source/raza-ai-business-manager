@@ -604,5 +604,97 @@ document.addEventListener("DOMContentLoaded", () => {
   updatePreview();
 });
 </script>
+  <script>
+async function signUp() {
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const message = document.getElementById("authMessage");
+
+  if (!email || !password) {
+    message.textContent = "Email aur password enter karein.";
+    return;
+  }
+
+  if (password.length < 8) {
+    message.textContent = "Password kam az kam 8 characters ka hona chahiye.";
+    return;
+  }
+
+  message.textContent = "Account create ho raha hai...";
+
+  const { data, error } = await window.razaSupabase.auth.signUp({
+    email,
+    password
+  });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  message.textContent = data.session
+    ? "Account create ho gaya aur login bhi ho gaya."
+    : "Account request successful. Email check karein aur confirmation link open karein.";
+
+  await updateAuthUI();
+}
+
+async function signIn() {
+  const email = document.getElementById("authEmail").value.trim();
+  const password = document.getElementById("authPassword").value;
+  const message = document.getElementById("authMessage");
+
+  if (!email || !password) {
+    message.textContent = "Email aur password enter karein.";
+    return;
+  }
+
+  message.textContent = "Login ho raha hai...";
+
+  const { error } = await window.razaSupabase.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if (error) {
+    message.textContent = error.message;
+    return;
+  }
+
+  message.textContent = "Login successful!";
+  await updateAuthUI();
+}
+
+async function signOut() {
+  const { error } = await window.razaSupabase.auth.signOut();
+
+  document.getElementById("authMessage").textContent =
+    error ? error.message : "Logout successful.";
+
+  await updateAuthUI();
+}
+
+async function updateAuthUI() {
+  const { data, error } = await window.razaSupabase.auth.getUser();
+
+  const status = document.getElementById("authStatus");
+  const signOutBtn = document.getElementById("signOutBtn");
+
+  if (error) {
+    status.textContent = "Auth error";
+    return;
+  }
+
+  if (data.user) {
+    status.textContent = "Signed in: " + data.user.email;
+    signOutBtn.hidden = false;
+  } else {
+    status.textContent = "Not signed in";
+    signOutBtn.hidden = true;
+  }
+}
+
+updateAuthUI();
+</script>
 </body>
 </html>
