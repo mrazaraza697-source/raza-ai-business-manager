@@ -260,16 +260,72 @@ function showPage(id, button) {
   if (button) button.classList.add("active");
 }
 
+
 function getSaved() {
   try {
-    return JSON.parse(localStorage.getItem("raza_business_content") || "[]");
+    return JSON.parse(
+      localStorage.getItem("raza_business_content") || "[]"
+    );
   } catch (e) {
     return [];
   }
 }
 
+async function loadSavedFromSupabase() {
+  try {
+    const supabase = window.razaSupabase;
+
+    if (!supabase) {
+      console.warn("Supabase connection not found.");
+      return;
+    }
+
+    const {
+      data: { user },
+      error: userError
+    } = await supabase.auth.getUser();
+
+    if (userError || !user) {
+      console.log("No logged-in user. Cloud loading skipped.");
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("saved_content")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Cloud Load Error:", error);
+      return;
+    }
+
+    const saved = (data || []).map(item => ({
+      text: item.content || "",
+      type: item.content_type || "content",
+      date: item.created_at
+        ? new Date(item.created_at).toLocaleString()
+        : ""
+    }));
+
+    localStorage.setItem(
+      "raza_business_content",
+      JSON.stringify(saved)
+    );
+
+    updateCount();
+
+    console.log("RAZA AI: Cloud content loaded successfully.");
+
+  } catch (error) {
+    console.error("Supabase Loading Error:", error);
+  }
+}
+
 function updateCount() {
   const count = getSaved().length;
+
   const savedCount = document.getElementById("savedCount");
   const reportCount = document.getElementById("reportCount");
 
@@ -277,18 +333,19 @@ function updateCount() {
   if (reportCount) reportCount.textContent = count;
 }
 
-
 async function saveText(text, type) {
   if (!text || !text.trim()) {
     return alert("Pehle content generate karein.");
   }
 
-  // 1. Browser mein local saving
+  const content = text.trim();
+
+  // Browser saving
   const saved = getSaved();
 
   saved.unshift({
-    text: text.trim(),
-    type,
+    text: content,
+    type: type || "content",
     date: new Date().toLocaleString()
   });
 
@@ -299,19 +356,25 @@ async function saveText(text, type) {
 
   updateCount();
 
-  // 2. Supabase cloud saving
+  // Supabase cloud saving
   try {
     const supabase = window.razaSupabase;
 
     if (!supabase) {
-      return alert("Content browser mein save ho gaya. Supabase connection nahi mila.");
+      return alert(
+        "Content browser mein save ho gaya. Supabase connection nahi mila."
+      );
     }
 
-    const { data: { user }, error: userError } =
-      await supabase.auth.getUser();
+    const {
+      data: { user },
+      error: userError
+    } = await supabase.auth.getUser();
 
     if (userError || !user) {
-      return alert("Content browser mein save ho gaya. Cloud saving ke liye login karein.");
+      return alert(
+        "Content browser mein save ho gaya. Cloud saving ke liye login karein."
+      );
     }
 
     const { error } = await supabase
@@ -319,17 +382,23 @@ async function saveText(text, type) {
       .insert({
         user_id: user.id,
         title: "RAZA AI Saved Content",
-        content: text.trim(),
+        content: content,
         content_type: type || "content",
         platform: "General"
       });
 
     if (error) {
       console.error("Supabase Save Error:", error);
-      return alert("Browser mein save ho gaya, lekin cloud saving failed: " + error.message);
+
+      return alert(
+        "Browser mein save ho gaya, lekin cloud saving failed: " +
+        error.message
+      );
     }
 
-    alert("Success! Content browser aur Supabase dono mein save ho gaya.");
+    alert(
+      "Success! Content browser aur Supabase dono mein save ho gaya."
+    );
 
   } catch (error) {
     console.error("Save Error:", error);
@@ -550,6 +619,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (assistantNotice) assistantNotice.remove();
 
   updateCount();
+  loadSavedFromSupabase();
 });
 </script>
 <script>
@@ -691,6 +761,7 @@ async function signUp() {
     : "Account request successful. Email check karein aur confirmation link open karein.";
 
   await updateAuthUI();
+  await loadSavedFromSupabase();
 }
 
 async function signIn() {
