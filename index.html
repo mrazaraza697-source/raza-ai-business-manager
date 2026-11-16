@@ -825,6 +825,7 @@ async function updateAuthUI() {
     status.textContent = "Signed in: " + data.user.email;
     signOutBtn.hidden = false;
     authCard.hidden = true;
+    await loadSavedCreationsList();
   } else {
     status.textContent = "Not signed in";
     signOutBtn.hidden = true;
