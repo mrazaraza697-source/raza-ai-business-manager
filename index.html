@@ -639,6 +639,249 @@ async function generateVideoScript() {
 
   await runAI(
     "video",
+   
+async function renderBusinessVideo() {
+  const button = document.getElementById("renderVideoBtn");
+  const status = document.getElementById("videoRenderStatus");
+  const preview = document.getElementById("videoPreview");
+  const download = document.getElementById("downloadVideo");
+
+  const topic = document.getElementById("videoTopic").value.trim();
+  const duration = parseInt(document.getElementById("duration").value, 10) || 15;
+  const imageFiles = Array.from(
+    document.getElementById("videoImages").files || []
+  );
+  const audioFile = document.getElementById("videoAudio").files?.[0];
+
+  if (!topic) {
+    alert("Please enter a video topic first.");
+    return;
+  }
+
+  if (!window.MediaRecorder || !HTMLCanvasElement.prototype.captureStream) {
+    status.textContent = "Your browser does not support video recording.";
+    return;
+  }
+
+  button.disabled = true;
+  download.style.display = "none";
+  status.textContent = "Preparing your video...";
+
+  let audioContext;
+  let audioElement;
+  let audioObjectUrl;
+  let animationFrame;
+
+  try {
+    const canvas = document.createElement("canvas");
+    canvas.width = 720;
+    canvas.height = 1280;
+
+    const ctx = canvas.getContext("2d");
+    const images = [];
+
+    for (const file of imageFiles) {
+      if (!file.type.startsWith("image/")) continue;
+
+      const image = new Image();
+      const url = URL.createObjectURL(file);
+
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = reject;
+        image.src = url;
+      });
+
+      images.push({ image, url });
+    }
+
+    const stream = canvas.captureStream(24);
+
+    if (audioFile) {
+      audioObjectUrl = URL.createObjectURL(audioFile);
+      audioElement = new Audio(audioObjectUrl);
+      audioElement.loop = true;
+
+      audioContext = new AudioContext();
+      const source = audioContext.createMediaElementSource(audioElement);
+      const destination = audioContext.createMediaStreamDestination();
+
+      source.connect(destination);
+      source.connect(audioContext.destination);
+
+      destination.stream.getAudioTracks().forEach(track => {
+        stream.addTrack(track);
+      });
+
+      await audioContext.resume();
+      await audioElement.play();
+    }
+
+    const mimeTypes = [
+      "video/mp4;codecs=h264",
+      "video/mp4",
+      "video/webm;codecs=vp9",
+      "video/webm;codecs=vp8",
+      "video/webm"
+    ];
+
+    const mimeType = mimeTypes.find(type =>
+      MediaRecorder.isTypeSupported(type)
+    );
+
+    if (!mimeType) {
+      throw new Error("This browser does not support video export.");
+    }
+
+    const recorder = new MediaRecorder(stream, {
+      mimeType,
+      videoBitsPerSecond: 2500000
+    });
+
+    const chunks = [];
+
+    recorder.ondataavailable = event => {
+      if (event.data.size > 0) chunks.push(event.data);
+    };
+
+    const finished = new Promise((resolve, reject) => {
+      recorder.onstop = resolve;
+      recorder.onerror = () => reject(
+        new Error("Video recording failed.")
+      );
+    });
+
+    const startedAt = performance.now();
+    const totalTime = duration * 1000;
+
+    function drawFrame(now) {
+      const elapsed = now - startedAt;
+      const progress = Math.min(elapsed / totalTime, 1);
+
+      const gradient = ctx.createLinearGradient(0, 0, 720, 1280);
+      gradient.addColorStop(0, "#101010");
+      gradient.addColorStop(1, "#29200c");
+
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, 720, 1280);
+
+      if (images.length) {
+        const index = Math.min(
+          Math.floor(elapsed / 5000) % images.length,
+          images.length - 1
+        );
+
+        const image = images[index].image;
+        const scale = Math.max(720 / image.width, 1280 / image.height);
+        const width = image.width * scale;
+        const height = image.height * scale;
+
+        ctx.save();
+        ctx.globalAlpha = 0.65;
+        ctx.drawImage(
+          image,
+          (720 - width) / 2,
+          (1280 - height) / 2,
+          width,
+          height
+        );
+        ctx.restore();
+      }
+
+      ctx.fillStyle = "rgba(0,0,0,0.48)";
+      ctx.fillRect(0, 0, 720, 1280);
+
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#D4AF37";
+      ctx.font = "bold 38px Arial";
+      ctx.fillText("RAZA TECHNOLOGIES AI", 360, 140);
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "bold 54px Arial";
+
+      const words = topic.split(/\s+/);
+      const lines = [];
+      let line = "";
+
+      for (const word of words) {
+        const test = line ? line + " " + word : word;
+
+        if (ctx.measureText(test).width > 600) {
+          lines.push(line);
+          line = word;
+        } else {
+          line = test;
+        }
+      }
+
+      if (line) lines.push(line);
+
+      const visibleLines = lines.slice(0, 5);
+      visibleLines.forEach((text, index) => {
+        ctx.fillText(text, 360, 520 + index * 75);
+      });
+
+      ctx.fillStyle = "#D4AF37";
+      ctx.font = "bold 34px Arial";
+      ctx.fillText("BUILD SMART. THINK BIG.", 360, 1000);
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "28px Arial";
+      ctx.fillText("Your Business. Your AI.", 360, 1060);
+
+      ctx.fillStyle = "#555555";
+      ctx.fillRect(60, 1160, 600, 12);
+
+      ctx.fillStyle = "#D4AF37";
+      ctx.fillRect(60, 1160, 600 * progress, 12);
+
+      ctx.fillStyle = "#FFFFFF";
+      ctx.font = "22px Arial";
+      ctx.fillText("RAZA TECH AI", 360, 1215);
+
+      status.textContent =
+        "Creating video: " + Math.round(progress * 100) + "%";
+
+      if (elapsed < totalTime) {
+        animationFrame = requestAnimationFrame(drawFrame);
+      } else {
+        recorder.stop();
+      }
+    }
+
+    recorder.start(250);
+    animationFrame = requestAnimationFrame(drawFrame);
+
+    await finished;
+
+    const extension = mimeType.includes("mp4") ? "mp4" : "webm";
+    const blob = new Blob(chunks, { type: mimeType });
+    const videoUrl = URL.createObjectURL(blob);
+
+    preview.src = videoUrl;
+    preview.load();
+
+    download.href = videoUrl;
+    download.download = "raza-business-video." + extension;
+    download.textContent = "Download " + extension.toUpperCase();
+    download.style.display = "inline-flex";
+
+    status.textContent = "Video created successfully!";
+
+    images.forEach(item => URL.revokeObjectURL(item.url));
+    stream.getTracks().forEach(track => track.stop());
+
+  } catch (error) {
+    if (animationFrame) cancelAnimationFrame(animationFrame);
+    status.textContent = "Video error: " + error.message;
+  } finally {
+    if (audioElement) audioElement.pause();
+    if (audioContext) await audioContext.close().catch(() => {});
+    if (audioObjectUrl) URL.revokeObjectURL(audioObjectUrl);
+    button.disabled = false;
+  }
+}
+
     {
       business: "RAZA TECHNOLOGIES AI",
       product: topic,
