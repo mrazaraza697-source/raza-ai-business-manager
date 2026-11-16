@@ -145,6 +145,15 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fAsdWFapEKukwd9TA71kYA_oP1yrtAV
           <div class="activity-empty"><span class="empty-icon">2</span><div><strong>Tell AI what you need</strong><span>Add context for useful, tailored drafts.</span></div></div>
           <div class="activity-empty"><span class="empty-icon">3</span><div><strong>Review and save</strong><span>Check every result before sharing it.</span></div></div>
         </div></article>
+        <article class="card activity-card">
+  <div class="section-title">
+    <h2>Saved Creations</h2>
+    <span id="savedItemsCount">0 items</span>
+  </div>
+  <div id="savedCreationsList">
+    <p>Loading saved creations...</p>
+  </div>
+</article>
       </section>
 
       <section class="page" id="assistant"><div class="page-heading"><div><div class="eyebrow">Your business copilot</div><h1>AI Assistant</h1><p class="page-subtitle">Ask for help with planning, marketing, customer communication, or day-to-day business tasks.</p></div></div>
@@ -824,7 +833,109 @@ async function updateAuthUI() {
 }
 
 updateAuthUI();
+  async function loadSavedCreationsList() {
+  const list = document.getElementById("savedCreationsList");
+  const count = document.getElementById("savedItemsCount");
+  const supabase = window.razaSupabase;
+
+  if (!list || !supabase) return;
+
+  list.textContent = "Loading saved creations...";
+
+  try {
+    const { data: { user }, error: userError } =
+      await supabase.auth.getUser();
+
+    if (userError || !user) {
+      list.textContent = "Please log in to view saved creations.";
+      return;
+    }
+
+    const { data, error } = await supabase
+      .from("saved_content")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false });
+
+    if (error) throw error;
+
+    count.textContent = `${data.length} items`;
+    list.innerHTML = "";
+
+    if (data.length === 0) {
+      list.textContent = "No saved creations yet.";
+      return;
+    }
+
+    data.forEach(item => {
+      const card = document.createElement("div");
+      card.style.cssText =
+        "padding:14px 0;border-bottom:1px solid var(--border, #333);";
+
+      const title = document.createElement("strong");
+      title.textContent = item.title || "Saved Creation";
+
+      const content = document.createElement("p");
+      content.textContent = item.content || "";
+      content.style.cssText = "white-space:pre-wrap;margin:8px 0;";
+
+      const date = document.createElement("small");
+      date.textContent = item.created_at
+        ? new Date(item.created_at).toLocaleString()
+        : "";
+
+      const deleteButton = document.createElement("button");
+      deleteButton.textContent = "Delete";
+      deleteButton.className = "btn btn-secondary btn-small";
+      deleteButton.style.marginTop = "10px";
+
+      deleteButton.addEventListener("click", () => {
+        deleteSavedCreation(item.id);
+      });
+
+      card.append(title, content, date, deleteButton);
+      list.appendChild(card);
+    });
+
+  } catch (error) {
+    console.error("Saved creations error:", error);
+    list.textContent = "Could not load saved creations.";
+  }
+}
+
+async function deleteSavedCreation(id) {
+  if (!confirm("Are you sure you want to delete this creation?")) return;
+
+  const supabase = window.razaSupabase;
+
+  try {
+    const { data: { user }, error: userError } =
+      await supabase.auth.getUser();
+
+    if (userError || !user) {
+      alert("Please log in first.");
+      return;
+    }
+
+    const { error } = await supabase
+      .from("saved_content")
+      .delete()
+      .eq("id", id)
+      .eq("user_id", user.id);
+
+    if (error) throw error;
+
+    await loadSavedCreationsList();
+    alert("Creation deleted successfully.");
+
+  } catch (error) {
+    console.error("Delete error:", error);
+    alert("Could not delete this creation.");
+    }
+}
+
+loadSavedCreationsList();
+
 </script>
 </body>
 </html>
-
