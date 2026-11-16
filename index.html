@@ -179,10 +179,93 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fAsdWFapEKukwd9TA71kYA_oP1yrtAV
           <article class="card output-card"><div class="output-top"><h2>Ad concept</h2><span class="output-status">AI draft</span></div><div class="output-box" id="adOutput" aria-live="polite" data-placeholder="Your ad headline and copy will appear here."></div><div class="form-actions"><button class="btn btn-secondary btn-small" onclick="saveOutput('adOutput')">Save ad</button></div></article></div>
       </section>
 
-      <section class="page" id="video"><div class="page-heading"><div><div class="eyebrow">Short-form storytelling</div><h1>AI Video Maker</h1><p class="page-subtitle">Turn a topic into a short video script with a scene-by-scene structure.</p></div></div>
-        <div class="form-layout"><article class="card form-card"><h2>Video brief</h2><p class="card-description">Describe the topic or idea. The result is a script draft, not a rendered video.</p><div class="fields"><div class="field full"><label for="videoTopic">Video topic</label><textarea id="videoTopic" placeholder="What should the video explain or showcase?"></textarea></div><div class="field"><label for="duration">Target duration</label><select id="duration"><option>15 seconds</option><option>30 seconds</option><option>45 seconds</option><option>60 seconds</option><option>90 seconds</option></select></div></div><div class="form-actions"><button class="btn" onclick="generateVideoScript()">▷&nbsp; Create video script</button></div></article>
-          <article class="card output-card"><div class="output-top"><h2>Video script</h2><span class="output-status">Script draft</span></div><div class="output-box" id="videoOutput" aria-live="polite" data-placeholder="Your scenes and voiceover will appear here."></div><div class="form-actions"><button class="btn btn-secondary btn-small" onclick="saveOutput('videoOutput')">Save script</button></div></article></div>
-      </section>
+      
+<section class="page" id="video">
+  <div class="page-heading">
+    <div>
+      <div class="eyebrow">Short-form storytelling</div>
+      <h1>AI Video Maker</h1>
+      <p class="page-subtitle">Create and export videos for your business.</p>
+    </div>
+  </div>
+
+  <div class="form-layout">
+    <article class="card form-card">
+      <h2>Video brief</h2>
+
+      <div class="fields">
+        <div class="field full">
+          <label for="videoTopic">Video topic</label>
+          <textarea id="videoTopic" placeholder="Describe your video idea..."></textarea>
+        </div>
+
+        <div class="field">
+          <label for="duration">Target duration</label>
+          <select id="duration">
+            <option>15 seconds</option>
+            <option>30 seconds</option>
+            <option>45 seconds</option>
+            <option>60 seconds</option>
+            <option>90 seconds</option>
+          </select>
+        </div>
+
+        <div class="field full">
+          <label for="videoImages">Upload images for your video</label>
+          <input id="videoImages" type="file" accept="image/*" multiple>
+        </div>
+
+        <div class="field full">
+          <label for="videoAudio">Background music or voiceover (optional)</label>
+          <input id="videoAudio" type="file" accept="audio/*">
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" onclick="generateVideoScript()">Create video script</button>
+      </div>
+    </article>
+
+    <article class="card output-card">
+      <div class="output-top">
+        <h2>Video script</h2>
+        <span class="output-status">Script draft</span>
+      </div>
+
+      <div class="output-box" id="videoOutput"
+        aria-live="polite"
+        data-placeholder="Your video script will appear here."></div>
+
+      <div class="form-actions">
+        <button class="btn btn-secondary btn-small"
+          onclick="saveOutput('videoOutput')">Save script</button>
+      </div>
+    </article>
+  </div>
+
+  <article class="card" style="margin-top:20px;">
+    <h2>Video Preview & Export</h2>
+    <p class="card-description">Turn your script and uploaded media into an animated video.</p>
+
+    <video id="videoPreview" controls playsinline
+      style="width:100%;max-width:600px;background:#000;border-radius:12px;">
+    </video>
+
+    <div class="form-actions">
+      <button class="btn" id="renderVideoBtn" onclick="renderBusinessVideo()">
+        Create MP4 / Video
+      </button>
+      <a id="downloadVideo" class="btn btn-secondary"
+        style="display:none;" download="raza-business-video.webm">
+        Download Video
+      </a>
+    </div>
+
+    <p id="videoRenderStatus" class="card-description">
+      Your finished video will appear here.
+    </p>
+  </article>
+</section>
 
       <section class="page" id="social"><div class="page-heading"><div><div class="eyebrow">Plan your presence</div><h1>Social Media Manager</h1><p class="page-subtitle">Build a practical posting plan with platform-specific ideas. This tool creates a plan; it does not publish or schedule posts.</p></div></div>
         <div class="notice"><strong>Planning only:</strong> Publishing and live analytics require authorized social platform integrations.</div>
