@@ -604,31 +604,6 @@ async function generateContent() {
   );
 }
 
-async function generateAd() {
-  const product = document.getElementById("adProduct").value.trim();
-  const offer = document.getElementById("adOffer").value.trim();
-  const audience = document.getElementById("audience").value.trim();
-  const platform = document.getElementById("adPlatform").value;
-  const button = document.querySelector("#ads button");
-
-  if (!product) return alert("Product name likhein.");
-
-  await runAI(
-    "advertisement",
-    {
-      business: "RAZA TECHNOLOGIES AI",
-      product,
-      platform,
-      audience,
-      objective: "Increase awareness and sales",
-      offer,
-      tone: "Professional and persuasive",
-      details: "Create an attractive advertisement. Do not invent product claims."
-    },
-    "adOutput",
-    button
-  );
-}
 
 async function generateVideoScript() {
   const topic = document.getElementById("videoTopic").value.trim();
@@ -639,7 +614,21 @@ async function generateVideoScript() {
 
   await runAI(
     "video",
-   
+    {
+      business: "RAZA TECHNOLOGIES AI",
+      product: topic,
+      platform: "Instagram Reels / TikTok / YouTube Shorts",
+      duration,
+      style: "Professional and engaging",
+      audience: "Relevant customers",
+      objective: "Increase awareness and engagement",
+      details: "Create a complete short-form video script with scenes and voiceover."
+    },
+    "videoOutput",
+    button
+  );
+}
+
 async function renderBusinessVideo() {
   const button = document.getElementById("renderVideoBtn");
   const status = document.getElementById("videoRenderStatus");
@@ -648,9 +637,11 @@ async function renderBusinessVideo() {
 
   const topic = document.getElementById("videoTopic").value.trim();
   const duration = parseInt(document.getElementById("duration").value, 10) || 15;
+
   const imageFiles = Array.from(
     document.getElementById("videoImages").files || []
   );
+
   const audioFile = document.getElementById("videoAudio").files?.[0];
 
   if (!topic) {
@@ -671,6 +662,8 @@ async function renderBusinessVideo() {
   let audioElement;
   let audioObjectUrl;
   let animationFrame;
+  let stream;
+  const imageUrls = [];
 
   try {
     const canvas = document.createElement("canvas");
@@ -685,17 +678,20 @@ async function renderBusinessVideo() {
 
       const image = new Image();
       const url = URL.createObjectURL(file);
+      imageUrls.push(url);
 
       await new Promise((resolve, reject) => {
         image.onload = resolve;
-        image.onerror = reject;
+        image.onerror = () => reject(
+          new Error("An uploaded image could not be loaded.")
+        );
         image.src = url;
       });
 
-      images.push({ image, url });
+      images.push(image);
     }
 
-    const stream = canvas.captureStream(24);
+    stream = canvas.captureStream(24);
 
     if (audioFile) {
       audioObjectUrl = URL.createObjectURL(audioFile);
@@ -703,6 +699,7 @@ async function renderBusinessVideo() {
       audioElement.loop = true;
 
       audioContext = new AudioContext();
+
       const source = audioContext.createMediaElementSource(audioElement);
       const destination = audioContext.createMediaStreamDestination();
 
@@ -741,7 +738,9 @@ async function renderBusinessVideo() {
     const chunks = [];
 
     recorder.ondataavailable = event => {
-      if (event.data.size > 0) chunks.push(event.data);
+      if (event.data.size > 0) {
+        chunks.push(event.data);
+      }
     };
 
     const finished = new Promise((resolve, reject) => {
@@ -766,13 +765,14 @@ async function renderBusinessVideo() {
       ctx.fillRect(0, 0, 720, 1280);
 
       if (images.length) {
-        const index = Math.min(
-          Math.floor(elapsed / 5000) % images.length,
-          images.length - 1
+        const index = Math.floor(elapsed / 5000) % images.length;
+        const image = images[index];
+
+        const scale = Math.max(
+          720 / image.width,
+          1280 / image.height
         );
 
-        const image = images[index].image;
-        const scale = Math.max(720 / image.width, 1280 / image.height);
         const width = image.width * scale;
         const height = image.height * scale;
 
@@ -816,8 +816,7 @@ async function renderBusinessVideo() {
 
       if (line) lines.push(line);
 
-      const visibleLines = lines.slice(0, 5);
-      visibleLines.forEach((text, index) => {
+      lines.slice(0, 5).forEach((text, index) => {
         ctx.fillText(text, 360, 520 + index * 75);
       });
 
@@ -868,34 +867,34 @@ async function renderBusinessVideo() {
 
     status.textContent = "Video created successfully!";
 
-    images.forEach(item => URL.revokeObjectURL(item.url));
-    stream.getTracks().forEach(track => track.stop());
-
   } catch (error) {
-    if (animationFrame) cancelAnimationFrame(animationFrame);
+    if (animationFrame) {
+      cancelAnimationFrame(animationFrame);
+    }
+
     status.textContent = "Video error: " + error.message;
+
   } finally {
     if (audioElement) audioElement.pause();
-    if (audioContext) await audioContext.close().catch(() => {});
-    if (audioObjectUrl) URL.revokeObjectURL(audioObjectUrl);
+
+    if (audioContext) {
+      await audioContext.close().catch(() => {});
+    }
+
+    if (audioObjectUrl) {
+      URL.revokeObjectURL(audioObjectUrl);
+    }
+
+    imageUrls.forEach(url => URL.revokeObjectURL(url));
+
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+    }
+
     button.disabled = false;
   }
 }
 
-    {
-      business: "RAZA TECHNOLOGIES AI",
-      product: topic,
-      platform: "Instagram Reels / TikTok / YouTube Shorts",
-      duration,
-      style: "Professional and engaging",
-      audience: "Relevant customers",
-      objective: "Increase awareness and engagement",
-      details: "Create a complete short-form video script with scenes and voiceover."
-    },
-    "videoOutput",
-    button
-  );
-}
 
 async function makeEmail() {
   const subject = document.getElementById("emailSubject").value.trim();
