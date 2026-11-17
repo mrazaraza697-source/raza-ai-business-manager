@@ -560,23 +560,6 @@ async function runAI(handler, payload, outputId, button) {
   }
 }
 
-async function askAI() {
-  const q = document.getElementById("ask").value.trim();
-  const button = document.querySelector("#assistant button");
-
-  if (!q) return alert("Apna task likhein.");
-
-  await runAI(
-    "assistant",
-    {
-      prompt: q,
-      task: "business assistance"
-    },
-    "answer",
-    button
-  );
-}
-
 async function generateContent() {
   const business = document.getElementById("business").value.trim();
   const product = document.getElementById("product").value.trim();
@@ -629,7 +612,7 @@ async function generateVideoScript() {
   );
 }
 
-async function renderBusinessVideo() {
+window.renderBusinessVideo = async function () {
   const button = document.getElementById("renderVideoBtn");
   const status = document.getElementById("videoRenderStatus");
   const preview = document.getElementById("videoPreview");
@@ -894,6 +877,7 @@ async function renderBusinessVideo() {
     button.disabled = false;
   }
 }
+
 
 
 async function makeEmail() {
