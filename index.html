@@ -520,7 +520,46 @@ async function callAI(handler, payload) {
       body: JSON.stringify(payload)
     }
   );
+async function runAI(handler, payload, outputId, button) {
+  const output = document.getElementById(outputId);
+  const originalText = button ? button.textContent : "";
 
+  output.textContent = "RAZA TECH AI is working...";
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Please wait...";
+  }
+
+  try {
+    const result = await callAI(handler, payload);
+    output.textContent = result;
+    return result;
+  } catch (error) {
+    output.textContent = "Error: " + error.message;
+    return null;
+  } finally {
+    if (button) {
+      button.disabled = false;
+      button.textContent = originalText;
+    }
+  }
+}
+
+window.askAI = async function () {
+  const input = document.getElementById("ask");
+  const button = document.querySelector("#assistant button");
+
+  if (!input || !input.value.trim()) {
+    alert("Apna task likhein.");
+    return;
+  }
+
+  await runAI("assistant", {
+    prompt: input.value.trim(),
+    task: "business assistance"
+  }, "answer", button);
+};
   const data = await response.json();
 
   if (!response.ok) {
