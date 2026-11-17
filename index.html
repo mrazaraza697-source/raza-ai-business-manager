@@ -524,6 +524,11 @@ async function runAI(handler, payload, outputId, button) {
   const output = document.getElementById(outputId);
   const originalText = button ? button.textContent : "";
 
+  if (!output) {
+    console.error("Output element not found:", outputId);
+    return null;
+  }
+
   output.textContent = "RAZA TECH AI is working...";
 
   if (button) {
@@ -538,13 +543,14 @@ async function runAI(handler, payload, outputId, button) {
   } catch (error) {
     output.textContent = "Error: " + error.message;
     return null;
-   } finally {
+  } finally {
     if (button) {
       button.disabled = false;
       button.textContent = originalText;
     }
   }
 }
+
 window.askAI = async function () {
   const input = document.getElementById("ask");
   const button = document.querySelector("#assistant button");
