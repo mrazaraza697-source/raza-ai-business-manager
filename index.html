@@ -535,6 +535,31 @@ async function callAI(handler, payload) {
   return data.text;
 }
 
+async function callAI(handler, payload) {
+  const response = await fetch(
+    "/api/router?handler=" + encodeURIComponent(handler),
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload)
+    }
+  );
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(data.error || "AI request failed.");
+  }
+
+  if (!data.text) {
+    throw new Error("AI returned an empty response.");
+  }
+
+  return data.text;
+}
+
 async function runAI(handler, payload, outputId, button) {
   const output = document.getElementById(outputId);
   const originalText = button ? button.textContent : "";
@@ -580,20 +605,6 @@ window.askAI = async function () {
     task: "business assistance"
   }, "answer", button);
 };
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || "AI request failed.");
-  }
-
-  if (!data.text) {
-    throw new Error("AI returned an empty response.");
-  }
-
-  return data.text;
-}
-
 async function runAI(handler, payload, outputId, button) {
   const output = document.getElementById(outputId);
   const originalText = button ? button.textContent : "";
