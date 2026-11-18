@@ -286,7 +286,44 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fAsdWFapEKukwd9TA71kYA_oP1yrtAV
           <div class="field full"><label for="whatsappOrderDetails">Order details <span class="optional">· optional</span></label><textarea id="whatsappOrderDetails" placeholder="Only verified order facts..."></textarea></div>
           <div class="field full"><label for="whatsappPolicies">Business policies <span class="optional">· optional</span></label><textarea id="whatsappPolicies" placeholder="Relevant confirmed policies..."></textarea></div>
         </div><div class="form-actions"><button class="btn" onclick="generateWhatsAppReply()">✳&nbsp; Draft a reply</button></div></article>
-          <article class="card output-card"><div class="output-top"><h2>Suggested reply</h2><span class="output-status">Review before sending</span></div><div class="output-box" id="whatsappOutput" aria-live="polite" data-placeholder="Your WhatsApp reply draft will appear here."></div><div class="form-actions"><button class="btn btn-secondary btn-small" onclick="saveOutput('whatsappOutput')">Save reply</button></div></article></div>
+          
+<article class="card output-card">
+  <div class="output-top">
+    <h2>Suggested reply</h2>
+    <span class="output-status">Review before sending</span>
+  </div>
+
+  <div
+    class="output-box"
+    id="whatsappOutput"
+    aria-live="polite"
+    data-placeholder="Your WhatsApp reply draft will appear here."
+  ></div>
+
+  <div class="form-actions">
+    <button
+      class="btn btn-secondary btn-small"
+      onclick="copyWhatsAppReply()"
+    >
+      Copy Reply
+    </button>
+
+    <button
+      class="btn btn-secondary btn-small"
+      onclick="generateWhatsAppReply()"
+    >
+      Regenerate
+    </button>
+
+    <button
+      class="btn btn-secondary btn-small"
+      onclick="saveOutput('whatsappOutput')"
+    >
+      Save Reply
+    </button>
+  </div>
+</article>
+</div>
       </section>
 
       <section class="page" id="email"><div class="page-heading"><div><div class="eyebrow">Clear business communication</div><h1>Email Manager</h1><p class="page-subtitle">Create a professional email draft from your subject and key points.</p></div></div>
