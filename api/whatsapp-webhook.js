@@ -195,8 +195,20 @@ export default async function handler(req, res) {
       return res.status(200).send(challenge);
     }
 
-    return res.status(403).send("Webhook verification failed.");
+return res.status(403).json({
+  error: "Webhook verification failed.",
+  debug: {
+    hasVerifyToken: Boolean(verifyToken),
+    modeReceived: mode,
+    tokenReceived: Boolean(token),
+    tokenMatches: Boolean(
+      verifyToken &&
+      token &&
+      token.trim() === verifyToken.trim()
+    ),
+    challengeReceived: Boolean(challenge)
   }
+});  }
 
   if (req.method !== "POST") {
     return res.status(405).json({
