@@ -1152,6 +1152,35 @@ document.addEventListener("DOMContentLoaded", () => {
   tagline.addEventListener("input", updatePreview);
   updatePreview();
 });
+  
+async function copyWhatsAppReply() {
+  const output = document.getElementById("whatsappOutput");
+  const reply = output?.innerText.trim();
+
+  if (!reply) {
+    return alert("Pehle WhatsApp reply generate karein.");
+  }
+
+  try {
+    await navigator.clipboard.writeText(reply);
+    alert("WhatsApp reply copied successfully!");
+  } catch (error) {
+    const textarea = document.createElement("textarea");
+    textarea.value = reply;
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    const copied = document.execCommand("copy");
+    textarea.remove();
+
+    if (copied) {
+      alert("WhatsApp reply copied successfully!");
+    } else {
+      alert("Copy nahi ho saka. Please manually copy karein.");
+    }
+  }
+}
+
 </script>
   
 <script>
