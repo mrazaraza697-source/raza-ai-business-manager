@@ -584,17 +584,6 @@ async function callAI(handler, payload) {
   return result.text;
 }
 
-async function callAI(handler, payload) {
-  const response = await fetch(
-    "/api/router?handler=" + encodeURIComponent(handler),
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify(payload)
-    }
-  );
 
   const data = await response.json();
 
