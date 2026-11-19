@@ -52,9 +52,7 @@ const handlers = {
 };
 
 async function parseJsonBody(req) {
-  if (req.body !== undefined) {
-    return;
-  }
+  if (req.body !== undefined) return;
 
   const chunks = [];
 
@@ -78,6 +76,37 @@ async function parseJsonBody(req) {
   }
 }
 
+async function verifyUser(req) {
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const publishableKey = process.env.SUPABASE_PUBLISHABLE_KEY;
+
+  if (!supabaseUrl || !publishableKey) {
+    throw new Error("Supabase server configuration is missing.");
+  }
+
+  const authHeader = req.headers.authorization || "";
+  const token = authHeader.startsWith("Bearer ")
+    ? authHeader.slice(7)
+    : "";
+
+  if (!token) return null;
+
+  const response = await fetch(
+    `${supabaseUrl}/auth/v1/user`,
+    {
+      method: "GET",
+      headers: {
+        "apikey": publishableKey,
+        "Authorization": `Bearer ${token}`
+      }
+    }
+  );
+
+  if (!response.ok) return null;
+
+  return await response.json();
+}
+
 export default async function handler(req, res) {
   const name = Array.isArray(req.query.handler)
     ? req.query.handler[0]
@@ -87,18 +116,34 @@ export default async function handler(req, res) {
 
   if (!selectedHandler) {
     return res.status(404).json({
-      error: "API route not found.",
-      receivedHandler: name,
-      availableHandlers: Object.keys(handlers)
+      error: "API route not found."
     });
   }
 
   try {
-    // Keep the WhatsApp webhook raw body untouched
-    // because it verifies Meta's request signature.
     if (name !== "whatsapp-webhook") {
       await parseJsonBody(req);
     }
+
+    // Public diagnostic endpoint
+    if (name === "health") {
+      return await selectedHandler(req, res);
+    }
+
+    // Meta webhook uses its own signature verification
+    if (name === "whatsapp-webhook") {
+      return await selectedHandler(req, res);
+    }
+
+    const user = await verifyUser(req);
+
+    if (!user || !user.id) {
+      return res.status(401).json({
+        error: "Unauthorized. Please login again."
+      });
+    }
+
+    req.user = user;
 
     return await selectedHandler(req, res);
 
