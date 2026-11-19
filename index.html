@@ -550,26 +550,38 @@ async function saveOutput(id) {
 
 
 async function callAI(handler, payload) {
+  const { data, error } =
+    await window.razaSupabase.auth.getSession();
+
+  const token = data?.session?.access_token;
+
+  if (error || !token) {
+    throw new Error("Please login first.");
+  }
+
   const response = await fetch(
     "/api/router?handler=" + encodeURIComponent(handler),
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`
+      },
       body: JSON.stringify(payload)
     }
   );
 
-  const data = await response.json();
+  const result = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.error || "AI request failed.");
+    throw new Error(result.error || "AI request failed.");
   }
 
-  if (!data.text) {
+  if (!result.text) {
     throw new Error("AI returned an empty response.");
   }
 
-  return data.text;
+  return result.text;
 }
 
 async function callAI(handler, payload) {
