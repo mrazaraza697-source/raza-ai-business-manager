@@ -268,6 +268,20 @@ const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_fAsdWFapEKukwd9TA71kYA_oP1yrtAV
 </section>
 
       <section class="page" id="social"><div class="page-heading"><div><div class="eyebrow">Plan your presence</div><h1>Social Media Manager</h1><p class="page-subtitle">Build a practical posting plan with platform-specific ideas. This tool creates a plan; it does not publish or schedule posts.</p></div></div>
+        <article class="card" style="margin-bottom:17px;">
+          <div class="output-top">
+            <div>
+              <h2>Facebook Page Connection</h2>
+              <p class="card-description" style="margin-bottom:8px;">Connect The Beauty Vault through Meta's official login. RAZA AI will securely store the Page connection for future approved publishing.</p>
+            </div>
+            <span class="output-status" id="facebookConnectionStatus">Checking connection...</span>
+          </div>
+          <div class="form-actions">
+            <button class="btn" id="connectFacebookBtn" onclick="connectFacebookPage()">Connect The Beauty Vault</button>
+            <button class="btn btn-secondary btn-small" onclick="loadFacebookConnectionStatus()">Refresh status</button>
+          </div>
+          <p class="hint">Connecting does not publish anything. Publishing will be a separate owner-approved action after Meta permissions and app review requirements are satisfied.</p>
+        </article>
         <div class="notice"><strong>Planning only:</strong> Publishing and live analytics require authorized social platform integrations.</div>
         <div class="form-layout"><article class="card form-card"><h2>Social media plan</h2><p class="card-description">Share your goals and cadence to get a tailored strategy and weekly content calendar.</p><div class="fields">
           <div class="field"><label for="socialBusiness">Business name</label><input id="socialBusiness" placeholder="Your business"></div><div class="field"><label for="socialPlatforms">Platforms</label><input id="socialPlatforms" placeholder="Instagram, LinkedIn..."></div>
@@ -1373,5 +1387,98 @@ async function deleteSavedCreation(id) {
 loadSavedCreationsList();
 
 </script>
+
+<script>
+async function connectFacebookPage() {
+  const button = document.getElementById("connectFacebookBtn");
+  const status = document.getElementById("facebookConnectionStatus");
+  const supabase = window.razaSupabase;
+
+  if (!supabase) {
+    status.textContent = "Supabase login is unavailable.";
+    return;
+  }
+
+  button.disabled = true;
+  status.textContent = "Starting secure Meta login...";
+
+  try {
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError || !session?.access_token) {
+      throw new Error("Pehle RAZA AI account mein login karein.");
+    }
+
+    const response = await fetch("/api/router?handler=facebook-oauth&action=start", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + session.access_token
+      },
+      body: "{}"
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.authUrl) {
+      throw new Error(data.error || "Facebook login start nahi ho saka.");
+    }
+
+    window.location.assign(data.authUrl);
+  } catch (error) {
+    status.textContent = error.message;
+    button.disabled = false;
+  }
+}
+
+async function loadFacebookConnectionStatus() {
+  const status = document.getElementById("facebookConnectionStatus");
+  if (!status || !window.razaSupabase) return;
+
+  try {
+    const { data: { session } } = await window.razaSupabase.auth.getSession();
+    if (!session?.access_token) {
+      status.textContent = "Login required";
+      return;
+    }
+
+    const response = await fetch("/api/router?handler=facebook-oauth&action=status", {
+      headers: { "Authorization": "Bearer " + session.access_token }
+    });
+    const data = await response.json();
+
+    if (!response.ok) throw new Error(data.error || "Status check failed.");
+
+    if (data.connected) {
+      status.textContent = "Connected: " + data.page.name;
+      status.style.color = "#178568";
+    } else {
+      status.textContent = "Not connected yet";
+      status.style.color = "";
+    }
+  } catch (error) {
+    status.textContent = error.message;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const params = new URLSearchParams(window.location.search);
+  const result = params.get("facebook");
+  const status = document.getElementById("facebookConnectionStatus");
+
+  if (result === "connected" && status) {
+    status.textContent = "Facebook Page connected successfully";
+    status.style.color = "#178568";
+    window.history.replaceState({}, "", window.location.pathname);
+  } else if (result === "error" && status) {
+    const reason = params.get("reason");
+    status.textContent = reason === "page_not_available"
+      ? "Page not returned by Meta. Check Page access and permissions."
+      : "Facebook connection did not complete. Please try again.";
+    window.history.replaceState({}, "", window.location.pathname);
+  }
+
+  loadFacebookConnectionStatus();
+});
+</script>
+
 </body>
 </html>
