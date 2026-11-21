@@ -1,4 +1,3 @@
-
 import advertisement from "../lib/handlers/advertisement.js";
 import analytics from "../lib/handlers/analytics.js";
 import assistant from "../lib/handlers/assistant.js";
@@ -7,6 +6,7 @@ import content from "../lib/handlers/content.js";
 import customerSupport from "../lib/handlers/customer-support.js";
 import database from "../lib/handlers/database.js";
 import email from "../lib/handlers/email.js";
+import facebookOAuth from "../lib/handlers/facebook-oauth.js";
 import health from "../lib/handlers/health.js";
 import integrations from "../lib/handlers/integrations.js";
 import notifications from "../lib/handlers/notifications.js";
@@ -36,6 +36,7 @@ const handlers = {
   "customer-support": customerSupport,
   database,
   email,
+  "facebook-oauth": facebookOAuth,
   health,
   integrations,
   notifications,
@@ -125,12 +126,19 @@ export default async function handler(req, res) {
       await parseJsonBody(req);
     }
 
-    // Public diagnostic endpoint
+    // Public callback: its one-time signed state is validated by the OAuth handler.
+    if (
+      name === "facebook-oauth" &&
+      String(req.query.action || "") === "callback" &&
+      req.method === "GET"
+    ) {
+      return await selectedHandler(req, res);
+    }
+
     if (name === "health") {
       return await selectedHandler(req, res);
     }
 
-    // Meta webhook uses its own signature verification
     if (name === "whatsapp-webhook") {
       return await selectedHandler(req, res);
     }
