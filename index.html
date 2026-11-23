@@ -574,7 +574,7 @@ async function callAI(handler, payload) {
   }
 
   const response = await fetch(
-    "/api/router?handler=" + encodeURIComponent(handler),
+    "/api/router.js?handler=" + encodeURIComponent(handler),
     {
       method: "POST",
       headers: {
@@ -1408,7 +1408,7 @@ async function connectFacebookPage() {
       throw new Error("Pehle RAZA AI account mein login karein.");
     }
 
-    const response = await fetch("/api/router?handler=facebook-oauth&action=start", {
+    const response = await fetch("/api/router.js?handler=facebook-oauth&action=start", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -1440,7 +1440,7 @@ async function loadFacebookConnectionStatus() {
       return;
     }
 
-    const response = await fetch("/api/router?handler=facebook-oauth&action=status", {
+    const response = await fetch("/api/router.js?handler=facebook-oauth&action=status", {
       headers: { "Authorization": "Bearer " + session.access_token }
     });
     const data = await response.json();
