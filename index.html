@@ -1419,7 +1419,8 @@ async function connectFacebookPage() {
 
     const data = await response.json();
     if (!response.ok || !data.authUrl) {
-      throw new Error(data.error || "Facebook login start nahi ho saka.");
+      const details = data.diagnostic ? " — " + data.diagnostic : "";
+      throw new Error((data.error || "Facebook login start nahi ho saka.") + details);
     }
 
     window.location.assign(data.authUrl);
