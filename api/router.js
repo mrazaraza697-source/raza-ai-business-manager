@@ -27,7 +27,25 @@ export const config = {
   }
 };
 
-// Best-effort per-instance rate limiter; not a globally shared limit.\nconst RATE_WINDOW_MS = 60000;\nconst RATE_LIMIT = 30;\nconst rateBuckets = new Map();\nconst MAX_BODY_BYTES = 1024 * 1024;\n\nfunction rateLimitUser(userId) {\n  const now = Date.now();\n  let bucket = rateBuckets.get(userId);\n  if (!bucket || now - bucket.start >= RATE_WINDOW_MS) bucket = { start: now, count: 0 };\n  bucket.count++;\n  rateBuckets.set(userId, bucket);\n  if (rateBuckets.size > 1000) {\n    for (const [id, entry] of rateBuckets) if (now - entry.start >= RATE_WINDOW_MS) rateBuckets.delete(id);\n  }\n  return bucket.count <= RATE_LIMIT;\n}\n\nconst handlers = {
+// Best-effort per-instance rate limiter; not a globally shared limit.
+const RATE_WINDOW_MS = 60000;
+const RATE_LIMIT = 30;
+const rateBuckets = new Map();
+const MAX_BODY_BYTES = 1024 * 1024;
+
+function rateLimitUser(userId) {
+  const now = Date.now();
+  let bucket = rateBuckets.get(userId);
+  if (!bucket || now - bucket.start >= RATE_WINDOW_MS) bucket = { start: now, count: 0 };
+  bucket.count++;
+  rateBuckets.set(userId, bucket);
+  if (rateBuckets.size > 1000) {
+    for (const [id, entry] of rateBuckets) if (now - entry.start >= RATE_WINDOW_MS) rateBuckets.delete(id);
+  }
+  return bucket.count <= RATE_LIMIT;
+}
+
+const handlers = {
   advertisement,
   analytics,
   assistant,
@@ -151,14 +169,23 @@ export default async function handler(req, res) {
       });
     }
 
-    if (!rateLimitUser(user.id)) {\n      res.setHeader("Retry-After", "60");\n      return res.status(429).json({ error: "Too many API requests. Please wait a minute and try again." });\n    }\n\n    req.user = user;
+    if (!rateLimitUser(user.id)) {
+      res.setHeader("Retry-After", "60");
+      return res.status(429).json({ error: "Too many API requests. Please wait a minute and try again." });
+    }
+
+    req.user = user;
 
     return await selectedHandler(req, res);
 
   } catch (error) {
     console.error("API router error:", error);
 
-    if (error.statusCode === 413) {\n      return res.status(413).json({ error: "Request body too large (1 MB maximum)." });\n    }\n\n    if (error.message === "Invalid JSON request body.") {
+    if (error.statusCode === 413) {
+      return res.status(413).json({ error: "Request body too large (1 MB maximum)." });
+    }
+
+    if (error.message === "Invalid JSON request body.") {
       return res.status(400).json({
         error: error.message
       });
